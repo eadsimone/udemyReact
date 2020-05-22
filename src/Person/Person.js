@@ -1,8 +1,20 @@
-import React from "react";
+import React from 'react';
 
-const person = (props) => {
-    const {age, name}= props
-   return <h2 onClick={props.click}>soy { name } una persona de {age} años</h2>
+import classes from './Person.css';
+
+const person = ( props ) => {
+    const rnd = Math.random();
+
+    if ( rnd > 0.7 ) {
+        throw new Error( 'Something went wrong' );
+    }
+    return (
+        <div className={classes.Person}>
+            <p onClick={props.click}>I'm {props.name} and I am {props.age} years old!</p>
+            <p>{props.children}</p>
+            <input type="text" onChange={props.changed} value={props.name} />
+        </div>
+    )
 };
 
 export default person;

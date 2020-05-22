@@ -1,55 +1,92 @@
-import React, {Component} from 'react';
-import './App.css';
-import Char from "./Char/Char";
-import Validation from "./Validation/Validation";
+import React, { Component } from 'react';
+import classes from './App.css';
+import Person from './Person/Person';
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary';
 
 class App extends Component {
-    constructor(props) {
-        super(props);
-        this.state = { inputValue: '' };
+  state = {
+    persons: [
+      { id: 'asfa1', name: 'Max', age: 28 },
+      { id: 'vasdf1', name: 'Manu', age: 29 },
+      { id: 'asdf11', name: 'Stephanie', age: 26 }
+    ],
+    otherState: 'some other value',
+    showPersons: false
+  }
 
-        this.handleOnChange = this.handleOnChange.bind(this);
-        this.handleRemoveChar = this.handleRemoveChar.bind(this);
+  nameChangedHandler = ( event, id ) => {
+    const personIndex = this.state.persons.findIndex( p => {
+      return p.id === id;
+    } );
 
-    }
-
-    handleOnChange = (event) => {
-        this.setState({
-            inputValue: event.target.value
-        })
+    const person = {
+      ...this.state.persons[personIndex]
     };
 
-    handleRemoveChar = (charIndex) => {
-        const listChars = [...this.state.inputValue.split("")] || [];
-        listChars.splice(charIndex,1);
-        const result2 = listChars.join('');
-        this.setState({
-            inputValue: result2
-        })
-    };
+    // const person = Object.assign({}, this.state.persons[personIndex]);
 
+    person.name = event.target.value;
 
-    render() {
-        // const listChars = this.state.inputValue || [];
-        const listChars = this.state.inputValue.split("") || [];
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
 
-        return (
-            <div className="App">
-                <h1>Hi soy peche! </h1>
-                <input type="text" onChange={this.handleOnChange} value={this.state.inputValue}/>
-                <p>{this.state.inputValue.length}</p>
-                <Validation size={this.state.inputValue.length} />
-                <div>
-                {listChars.map( (value, index) => {
-                    return <Char click={() =>this.handleRemoveChar(index)} key={index} value={value} />
-                })}
-                </div>
+    this.setState( { persons: persons } );
+  }
 
-            </div>
-        );
+  deletePersonHandler = ( personIndex ) => {
+    // const persons = this.state.persons.slice();
+    const persons = [...this.state.persons];
+    persons.splice( personIndex, 1 );
+    this.setState( { persons: persons } );
+  }
+
+  togglePersonsHandler = () => {
+    const doesShow = this.state.showPersons;
+    this.setState( { showPersons: !doesShow } );
+  }
+
+  render () {
+    let persons = null;
+    let btnClass = '';
+
+    if ( this.state.showPersons ) {
+      persons = (
+        <div>
+          {this.state.persons.map( ( person, index ) => {
+            return <ErrorBoundary key={person.id}>
+              <Person
+                click={() => this.deletePersonHandler( index )}
+                name={person.name}
+                age={person.age}
+                changed={( event ) => this.nameChangedHandler( event, person.id )} />
+            </ ErrorBoundary>
+          } )}
+        </div>
+      );
+
+      btnClass = classes.Red;
     }
 
+    const assignedClasses = [];
+    if ( this.state.persons.length <= 2 ) {
+      assignedClasses.push( classes.red ); // classes = ['red']
+    }
+    if ( this.state.persons.length <= 1 ) {
+      assignedClasses.push( classes.bold ); // classes = ['red', 'bold']
+    }
 
+    return (
+      <div className={classes.App}>
+        <h1>Hi, I'm a React App</h1>
+        <p className={assignedClasses.join( ' ' )}>This is really working!</p>
+        <button
+          className={btnClass}
+          onClick={this.togglePersonsHandler}>Toggle Persons</button>
+        {persons}
+      </div>
+    );
+    // return React.createElement('div', {className: 'App'}, React.createElement('h1', null, 'Does this work now?'));
+  }
 }
 
 export default App;
